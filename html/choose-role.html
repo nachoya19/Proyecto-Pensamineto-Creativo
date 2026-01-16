@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elegir rol</title>
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+    body{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      background:linear-gradient(135deg,#1f2937,#111827);
+      color:white;
+    }
+    .box{
+      width:100%;
+      max-width:520px;
+      padding:26px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.15);
+      box-shadow:0 10px 30px rgba(0,0,0,0.25);
+      text-align:center;
+    }
+    h1{margin-bottom:10px;}
+    p{opacity:0.85;margin-bottom:18px;}
+    .roles{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:12px;
+    }
+    button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.2s;
+    }
+    .doctor{background:#a855f7;color:white;}
+    .doctor:hover{background:#9333ea;}
+    .teacher{background:#10b981;color:white;}
+    .teacher:hover{background:#059669;}
+    .parent{background:#3b82f6;color:white;}
+    .parent:hover{background:#2563eb;}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Selecciona tu rol</h1>
+    <p>Tu cuenta tiene varios accesos. Elige cómo quieres entrar.</p>
+
+    <div class="roles" id="rolesContainer"></div>
+  </div>
+
+  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/choose-role.js"></script>
+</body>
+</html>

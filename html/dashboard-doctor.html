@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Médico</title>
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+    body{min-height:100vh;background:linear-gradient(135deg,#1f2937,#111827);color:white;padding:20px;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);margin-bottom:18px;}
+    .btn{padding:10px 12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;}
+    .logout{background:#ef4444;color:white;}
+    .logout:hover{background:#dc2626;}
+
+    .grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:18px;}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr;}}
+
+    .card{padding:18px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);}
+    h2{margin-bottom:10px;}
+    label{display:block;margin:10px 0 6px;font-size:14px;opacity:0.9;}
+    input,select,textarea{width:100%;padding:12px;border-radius:10px;border:none;outline:none;background:rgba(255,255,255,0.12);color:white;}
+    textarea{min-height:90px;resize:none;}
+
+    button.save{width:100%;margin-top:12px;background:#10b981;color:white;}
+    button.save:hover{background:#059669;}
+
+    .list{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;max-height:320px;overflow:auto;}
+    .item{padding:12px;border-radius:10px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.10);}
+    .small{font-size:12px;opacity:0.85;}
+
+    .msg{margin-top:10px;padding:10px;border-radius:10px;font-size:14px;display:none;}
+    .ok{display:block;background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.35);color:#34d399;}
+    .err{display:block;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>🧠 Panel Médico</div>
+    <button class="btn logout" id="logoutBtn">Cerrar sesión</button>
+  </header>
+
+  <main class="grid">
+
+    <!-- INVITAR -->
+    <section class="card">
+      <h2>Invitar usuario</h2>
+
+      <form id="inviteForm">
+        <label>Email del usuario</label>
+        <input type="email" id="inviteEmail" required placeholder="profe@cole.com" />
+
+        <label>Rol</label>
+        <select id="inviteRole">
+          <option value="teacher">Profesor</option>
+          <option value="parent">Padre/Madre</option>
+        </select>
+
+        <button class="btn save" type="submit">Crear invitación</button>
+        <div class="msg" id="inviteMsg"></div>
+      </form>
+    </section>
+
+    <!-- CREAR ALUMNO -->
+    <section class="card">
+      <h2>Crear alumno</h2>
+
+      <form id="studentForm">
+        <label>Nombre completo</label>
+        <input type="text" id="studentName" required placeholder="Ej: Daniel Pérez" />
+
+        <button class="btn save" type="submit">Crear alumno</button>
+        <div class="msg" id="studentMsg"></div>
+      </form>
+    </section>
+
+    <!-- ASIGNAR -->
+    <section class="card" style="grid-column:1/-1;">
+      <h2>Asignar profesor/padre</h2>
+
+      <form id="assignForm">
+        <label>Alumno</label>
+        <select id="studentSelect" required></select>
+
+        <label>Email a asignar</label>
+        <input type="email" id="assignEmail" required placeholder="padre@casa.com" />
+
+        <label>Tipo</label>
+        <select id="assignType">
+          <option value="teachers">Profesor</option>
+          <option value="parents">Padre/Madre</option>
+        </select>
+
+        <button class="btn save" type="submit">Asignar</button>
+        <div class="msg" id="assignMsg"></div>
+      </form>
+    </section>
+
+    <!-- CREAR REGISTRO -->
+    <section class="card" style="grid-column:1/-1;">
+      <h2>Crear registro / seguimiento</h2>
+
+      <form id="recordForm">
+        <label>Alumno</label>
+        <select id="recordStudentSelect" required></select>
+
+        <label>Tipo</label>
+        <select id="type">
+          <option value="conducta">Conducta</option>
+          <option value="asistencia">Asistencia</option>
+          <option value="recomendacion">Recomendación</option>
+          <option value="nota">Nota</option>
+        </select>
+
+        <label>Descripción</label>
+        <textarea id="text" required placeholder="Ej: Evaluación inicial, recomendaciones..."></textarea>
+
+        <button class="btn save" type="submit">Guardar registro</button>
+        <div class="msg" id="recordMsg"></div>
+      </form>
+    </section>
+
+    <!-- LISTA ALUMNOS -->
+    <section class="card list">
+      <h2>Mis alumnos</h2>
+      <div id="studentsList"></div>
+    </section>
+
+    <!-- VER MENSAJES POR ALUMNO -->
+    <section class="card list">
+      <h2>Registros del alumno</h2>
+
+      <label>Ver registros de:</label>
+      <select id="filterStudentSelect"></select>
+
+      <div style="height:10px;"></div>
+      <div id="recordsList"></div>
+    </section>
+
+  </main>
+
+  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/dashboard-doctor.js"></script>
+</body>
+</html>

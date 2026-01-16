@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Padre/Madre</title>
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+    body{min-height:100vh;background:linear-gradient(135deg,#1f2937,#111827);color:white;padding:20px;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);margin-bottom:18px;}
+    .btn{padding:10px 12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;}
+    .logout{background:#ef4444;color:white;}
+    .logout:hover{background:#dc2626;}
+    .wrap{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:18px;}
+    @media(min-width:900px){.wrap{grid-template-columns:1fr 1fr;}}
+    .card{padding:18px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);}
+    select{width:100%;padding:12px;border-radius:10px;border:none;outline:none;background:rgba(255,255,255,0.12);color:white;}
+    .list{grid-column:1/-1;max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:10px;}
+    .item{padding:12px;border-radius:10px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.10);}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>👨‍👩‍👧 Panel Padres</div>
+    <button class="btn logout" id="logoutBtn">Cerrar sesión</button>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>Mis hijos</h2>
+      <select id="studentSelect"></select>
+    </section>
+
+    <section class="card list" id="recordsList"></section>
+  </main>
+
+  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/dashboard-parent.js"></script>
+</body>
+</html>
