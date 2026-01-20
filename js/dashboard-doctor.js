@@ -1,3 +1,10 @@
+/**
+ * @file dashboard-doctor.js
+ * @description Controller for the Doctor's Dashboard.
+ * Allows doctors to invite users, manage students, assign students to teachers/parents,
+ * and create/view records.
+ */
+
 import { auth, db } from "./main.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import {
@@ -16,47 +23,55 @@ import {
   orderBy,
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-// Header
+// DOM Elements
 const logoutBtn = document.getElementById("logoutBtn");
 
-// Invite
+// Invite Section
 const inviteForm = document.getElementById("inviteForm");
 const inviteEmail = document.getElementById("inviteEmail");
 const inviteRole = document.getElementById("inviteRole");
 const inviteMsg = document.getElementById("inviteMsg");
 
-// Create student
+// Student Section
 const studentForm = document.getElementById("studentForm");
 const studentName = document.getElementById("studentName");
 const studentMsg = document.getElementById("studentMsg");
 
-// Assign
+// Assignment Section
 const assignForm = document.getElementById("assignForm");
 const studentSelect = document.getElementById("studentSelect");
 const assignEmail = document.getElementById("assignEmail");
 const assignType = document.getElementById("assignType");
 const assignMsg = document.getElementById("assignMsg");
 
-// Record form
+// Record Creation Section
 const recordForm = document.getElementById("recordForm");
 const recordStudentSelect = document.getElementById("recordStudentSelect");
 const typeInput = document.getElementById("type");
 const textInput = document.getElementById("text");
 const recordMsg = document.getElementById("recordMsg");
 
-// UI list
+// Lists
 const studentsList = document.getElementById("studentsList");
-
-// Filter records by student
 const filterStudentSelect = document.getElementById("filterStudentSelect");
 const recordsList = document.getElementById("recordsList");
 
-// Utils
+/**
+ * Displays feedback message.
+ * @param {HTMLElement} el - The element to display the message in.
+ * @param {string} text - Message text.
+ * @param {boolean} [ok=true] - Success status.
+ */
 function show(el, text, ok = true) {
   el.textContent = text;
   el.className = "msg " + (ok ? "ok" : "err");
 }
 
+/**
+ * Escapes HTML characters to prevent XSS.
+ * @param {string} str - Input string.
+ * @returns {string} Escaped string.
+ */
 function escapeHtml(str) {
   return (str || "")
     .replaceAll("&", "&amp;")
@@ -64,7 +79,7 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;");
 }
 
-// Logout
+// LOGOUT
 logoutBtn.addEventListener("click", async () => {
   try {
     await signOut(auth);
@@ -78,7 +93,7 @@ logoutBtn.addEventListener("click", async () => {
 let currentDoctorUid = null;
 let unsubscribeRecords = null;
 
-// ✅ PROTEGER Y CARGAR TODO
+// ✅ INIT & PROTECT
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
@@ -87,7 +102,7 @@ onAuthStateChanged(auth, async (user) => {
 
   currentDoctorUid = user.uid;
 
-  // Confirmar doctor
+  // Verify 'doctor' role
   const profileSnap = await getDoc(doc(db, "users", user.uid));
   if (!profileSnap.exists()) {
     window.location.href = "login.html";
@@ -101,8 +116,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // ✅ LISTENER de alumnos creados por este médico
-  // IMPORTANTE: sin orderBy para evitar índices en alfa
+  // ✅ LISTEN for students created by this doctor
   const qStudents = query(
     collection(db, "students"),
     where("createdByDoctorUid", "==", user.uid)
@@ -139,47 +153,48 @@ onAuthStateChanged(auth, async (user) => {
       const s = d.data();
       const id = d.id;
 
-      // Lista alumnos (sin ID)
+      // Render in student list
       const div = document.createElement("div");
       div.className = "item";
       div.innerHTML = `<b>${escapeHtml(s.fullName)}</b>`;
       studentsList.appendChild(div);
 
-      // Select asignar
+      // Add to selects
       const opt1 = document.createElement("option");
       opt1.value = id;
       opt1.textContent = s.fullName;
       studentSelect.appendChild(opt1);
 
-      // Select crear registro
       const opt2 = document.createElement("option");
       opt2.value = id;
       opt2.textContent = s.fullName;
       recordStudentSelect.appendChild(opt2);
 
-      // Select filtrar registros
       const opt3 = document.createElement("option");
       opt3.value = id;
       opt3.textContent = s.fullName;
       filterStudentSelect.appendChild(opt3);
     });
 
-    // Si no hay ninguno seleccionado aún, ponemos el primero
+    // Auto-select first student for filtering
     if (!filterStudentSelect.value && filterStudentSelect.options.length > 0) {
       filterStudentSelect.value = filterStudentSelect.options[0].value;
     }
 
-    // Cargar registros del alumno seleccionado
+    // Load records for the selected student
     startRecordsListener(filterStudentSelect.value);
   });
 
-  // Cuando cambie el alumno seleccionado, recargar
+  // Reload records when filter changes
   filterStudentSelect.addEventListener("change", () => {
     startRecordsListener(filterStudentSelect.value);
   });
 });
 
-// ✅ Listener de registros solo del alumno seleccionado
+/**
+ * Starts listening for real-time record updates for a specific student.
+ * @param {string} studentId - The ID of the student.
+ */
 function startRecordsListener(studentId) {
   if (!studentId) {
     recordsList.innerHTML = `<div class="item">Selecciona un alumno.</div>`;
@@ -221,7 +236,7 @@ function startRecordsListener(studentId) {
   });
 }
 
-// ✅ INVITACIÓN
+// ✅ INVITE USER
 inviteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -243,7 +258,7 @@ inviteForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ✅ CREAR ALUMNO
+// ✅ CREATE STUDENT
 studentForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -265,20 +280,21 @@ studentForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ✅ ASIGNAR POR EMAIL
+// ✅ ASSIGN USER TO STUDENT
 assignForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   try {
     const studentId = studentSelect.value;
     const email = assignEmail.value.trim().toLowerCase();
-    const type = assignType.value;
+    const type = assignType.value; // 'teachers' or 'parents'
 
     if (!studentId) {
       show(assignMsg, "❌ No hay alumno seleccionado.", false);
       return;
     }
 
+    // Find user by email
     const usersRef = collection(db, "users");
     const qUser = query(usersRef, where("email", "==", email));
     const snap = await getDocs(qUser);
@@ -290,6 +306,7 @@ assignForm.addEventListener("submit", async (e) => {
 
     const uid = snap.docs[0].id;
 
+    // Add uid to student's teachers/parents array
     await updateDoc(doc(db, "students", studentId), {
       [type]: arrayUnion(uid),
     });
@@ -301,7 +318,7 @@ assignForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ✅ MÉDICO CREA REGISTRO
+// ✅ CREATE RECORD
 recordForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 

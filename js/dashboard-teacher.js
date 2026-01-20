@@ -1,3 +1,9 @@
+/**
+ * @file dashboard-teacher.js
+ * @description Controller for the Teacher's Dashboard.
+ * Allows teachers to view assigned students and create/view records.
+ */
+
 import { auth, db } from "./main.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import {
@@ -11,6 +17,7 @@ import {
   orderBy,
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+// DOM Elements
 const logoutBtn = document.getElementById("logoutBtn");
 const studentSelect = document.getElementById("studentSelect");
 
@@ -20,6 +27,7 @@ const textInput = document.getElementById("text");
 
 const recordsList = document.getElementById("recordsList");
 
+// Logout
 logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   sessionStorage.removeItem("activeRole");
@@ -29,6 +37,11 @@ logoutBtn.addEventListener("click", async () => {
 let currentStudentId = null;
 let unsubRecords = null;
 
+/**
+ * Escapes HTML characters.
+ * @param {string} str
+ * @returns {string}
+ */
 function escapeHtml(str) {
   return (str || "")
     .replaceAll("&", "&amp;")
@@ -36,6 +49,11 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;");
 }
 
+/**
+ * Renders a record item.
+ * @param {Object} data
+ * @returns {HTMLElement}
+ */
 function renderRecord(data) {
   const div = document.createElement("div");
   div.className = "item";
@@ -52,12 +70,14 @@ function renderRecord(data) {
   return div;
 }
 
+// ✅ INIT & PROTECT
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
+  // Find students where this user is in 'teachers' array
   const studentsRef = collection(db, "students");
   const q = query(studentsRef, where("teachers", "array-contains", user.uid));
   const snap = await getDocs(q);
@@ -79,15 +99,21 @@ onAuthStateChanged(auth, async (user) => {
     studentSelect.appendChild(opt);
   });
 
+  // Select first by default
   currentStudentId = studentSelect.value;
   loadRecords(currentStudentId);
 });
 
+// Switch student
 studentSelect.addEventListener("change", () => {
   currentStudentId = studentSelect.value;
   loadRecords(currentStudentId);
 });
 
+/**
+ * Loads records for a student.
+ * @param {string} studentId
+ */
 function loadRecords(studentId) {
   if (!studentId) return;
 
@@ -117,6 +143,7 @@ function loadRecords(studentId) {
   });
 }
 
+// ✅ CREATE RECORD
 recordForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 

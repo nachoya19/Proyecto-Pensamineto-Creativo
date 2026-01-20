@@ -1,3 +1,9 @@
+/**
+ * @file registro.js
+ * @description Handles new user registration.
+ * Supports registration via invitation (preserving roles) or open registration.
+ */
+
 import { auth, db } from "./main.js";
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import {
@@ -13,15 +19,22 @@ const passInput = document.getElementById("password");
 const modeInput = document.getElementById("mode");
 const msg = document.getElementById("msg");
 
+// Navigation to Login
 document.getElementById("goLogin").addEventListener("click", () => {
   window.location.href = "login.html";
 });
 
+/**
+ * Displays feedback message.
+ * @param {string} text - Message text.
+ * @param {boolean} [ok=true] - Success status.
+ */
 function show(text, ok = true) {
   msg.textContent = text;
   msg.className = "msg " + (ok ? "ok" : "err");
 }
 
+// REGISTRATION HANDLER
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -30,8 +43,8 @@ form.addEventListener("submit", async (e) => {
   const mode = modeInput.value;
 
   try {
-    // ✅ 1) Determinar roles
-    let roles = ["doctor"]; // por defecto si es médico
+    // ✅ 1) Determine roles
+    let roles = ["doctor"]; // Default if mode is not invited (e.g. initial doctor)
 
     if (mode === "invited") {
       const inviteRef = doc(db, "invites", email);
@@ -44,7 +57,7 @@ form.addEventListener("submit", async (e) => {
 
       const data = inviteSnap.data();
 
-      // ✅ Compatibilidad: invites antiguos y nuevos
+      // ✅ Compatibility: handle legacy single role vs new roles array
       if (Array.isArray(data.roles)) {
         roles = data.roles;
       } else if (data.role) {
@@ -54,14 +67,14 @@ form.addEventListener("submit", async (e) => {
       }
     }
 
-    // ✅ 2) Crear usuario en Firebase Auth
+    // ✅ 2) Create Auth User
     const cred = await createUserWithEmailAndPassword(auth, email, password);
 
     if (!auth.currentUser) {
       throw new Error("No se pudo iniciar sesión tras el registro.");
     }
 
-    // ✅ 3) Guardar perfil en Firestore
+    // ✅ 3) Create User Profile in Firestore
     await setDoc(doc(db, "users", cred.user.uid), {
       email,
       roles,

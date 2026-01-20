@@ -1,12 +1,16 @@
+/**
+ * @file login.js
+ * @description Handles user authentication (Login).
+ */
+
 import { auth } from "./main.js";
 import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-// ELEMENTOS HTML
+// HTML ELEMENTS
 const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -14,14 +18,18 @@ const registerBtn = document.getElementById("registerBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const messageBox = document.getElementById("messageBox");
 
-// FUNCIÓN PARA MENSAJES
+/**
+ * Displays a feedback message to the user.
+ * @param {string} text - The message content.
+ * @param {string} type - The message type ('success' or 'error').
+ */
 function showMessage(text, type) {
   messageBox.style.display = "block";
   messageBox.textContent = text;
   messageBox.className = "message " + type;
 }
 
-// LOGIN
+// LOGIN EVENT
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -31,20 +39,19 @@ loginForm.addEventListener("submit", async (e) => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
     showMessage("✅ Login correcto. Bienvenido!", "success");
+    // Redirect to dashboard router which handles role-based redirection
     window.location.href = "dashboard.html";
-
-    // window.location.href = "dashboard.html";
   } catch (error) {
     showMessage("❌ Error: " + error.message, "error");
   }
 });
 
-// REGISTRAR USUARIO
+// REDIRECT TO REGISTER
 registerBtn.addEventListener("click", () => {
   window.location.href = "registro.html";
 });
 
-// LOGOUT
+// LOGOUT EVENT
 logoutBtn.addEventListener("click", async () => {
   try {
     await signOut(auth);
@@ -54,7 +61,7 @@ logoutBtn.addEventListener("click", async () => {
   }
 });
 
-// DETECTAR SESIÓN ACTIVA
+// SESSION LISTENER
 onAuthStateChanged(auth, (user) => {
   if (user) {
     showMessage("✅ Sesión activa: " + user.email, "success");

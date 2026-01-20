@@ -1,3 +1,9 @@
+/**
+ * @file dashboard.js
+ * @description Generic dashboard logic for displaying global records.
+ * Currently serves as a basic view or fallback dashboard.
+ */
+
 import { auth, db } from "./main.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import {
@@ -10,7 +16,7 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-// ELEMENTOS
+// DOM Elements
 const userEmail = document.getElementById("userEmail");
 const logoutBtn = document.getElementById("logoutBtn");
 
@@ -21,13 +27,21 @@ const textInput = document.getElementById("text");
 const recordsList = document.getElementById("recordsList");
 const statusBox = document.getElementById("statusBox");
 
-// MENSAJES
+/**
+ * Displays a status message to the user.
+ * @param {string} text - The message text.
+ * @param {boolean} [ok=true] - Whether the message is success (true) or error (false).
+ */
 function showStatus(text, ok = true) {
   statusBox.textContent = text;
   statusBox.className = "status " + (ok ? "ok" : "err");
 }
 
-// Pintar items
+/**
+ * Creates a DOM element representing a record.
+ * @param {Object} docData - The record data from Firestore.
+ * @returns {HTMLElement} The constructed div element.
+ */
 function renderRecord(docData) {
   const div = document.createElement("div");
   div.className = "item";
@@ -48,22 +62,21 @@ function renderRecord(docData) {
 
 let unsubscribeRecords = null;
 
-// ✅ PROTEGER DASHBOARD
+// ✅ PROTECT DASHBOARD & INIT
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  // Usuario logueado ✅
+  // User logged in
   userEmail.textContent = user.email;
   showStatus("✅ Sesión activa. Puedes registrar observaciones.", true);
 
-  // Escuchar registros en tiempo real del usuario
+  // Listen for real-time updates
   const colRef = collection(db, "records");
 
-  // Para alfa: mostramos últimos 20 (globales del sistema)
-  // Si quieres que sean privados por usuario, filtramos por uid.
+  // Query last 20 records globally (system-wide)
   const q = query(colRef, orderBy("createdAt", "desc"), limit(20));
 
   if (unsubscribeRecords) unsubscribeRecords();
@@ -83,7 +96,7 @@ onAuthStateChanged(auth, (user) => {
   });
 });
 
-// ✅ GUARDAR REGISTRO
+// ✅ SAVE RECORD
 recordForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -117,7 +130,7 @@ recordForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ✅ CERRAR SESIÓN
+// ✅ LOGOUT
 logoutBtn.addEventListener("click", async () => {
   try {
     await signOut(auth);
